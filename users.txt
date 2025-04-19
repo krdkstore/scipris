@@ -1,5 +1,5 @@
-admin:admin
-xeumouse:xeumouse
+admin:admin123
 doumi:doumi
 rito:rito
 krdk:krdk
+demo:demo
